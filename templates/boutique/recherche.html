@@ -1,0 +1,174 @@
+<!-- Chemin : templates/boutique/recherche.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+{% if query %}
+Recherche : "{{ query }}" - InArtDeco
+{% else %}
+Recherche - InArtDeco
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- En-tête de recherche -->
+            <div class="d-flex align-items-center mb-4">
+                <h1 class="me-3">
+                    <i class="fas fa-search"></i> Recherche
+                </h1>
+                
+                <!-- Barre de recherche -->
+                <form method="GET" class="flex-grow-1" style="max-width: 500px;">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" 
+                               value="{{ query }}" 
+                               placeholder="Rechercher des produits..."
+                               autofocus>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                    </div>
+                </form>
+                
+                <a href="{% url 'boutique:recherche_avancee' %}" class="btn btn-outline-secondary ms-3">
+                    <i class="fas fa-sliders-h"></i> Recherche avancée
+                </a>
+            </div>
+            
+            <!-- Résultats -->
+            {% if query %}
+                <div class="mb-4">
+                    {% if total_results > 0 %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>{{ total_results }}</strong> produit{{ total_results|pluralize }} trouvé{{ total_results|pluralize }} pour "<em>{{ query }}</em>"
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Aucun produit trouvé pour "<em>{{ query }}</em>"
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if page_obj %}
+                    <!-- Liste des produits -->
+                    <div class="row">
+                        {% for produit in page_obj %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            {% include 'boutique/includes/product_card.html' %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="mt-4">
+                        {% include 'boutique/includes/pagination.html' %}
+                    </div>
+                    {% endif %}
+                    
+                {% else %}
+                    <!-- Suggestions si aucun résultat -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h3>Aucun résultat trouvé</h3>
+                        <p class="text-muted mb-4">Voici quelques suggestions :</p>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success"></i> Vérifiez l'orthographe de votre recherche</li>
+                                    <li><i class="fas fa-check text-success"></i> Utilisez des mots-clés plus généraux</li>
+                                    <li><i class="fas fa-check text-success"></i> Essayez des synonymes</li>
+                                    <li><i class="fas fa-check text-success"></i> Réduisez le nombre de mots-clés</li>
+                                </ul>
+                                
+                                <div class="mt-4">
+                                    <a href="{% url 'boutique:liste_produits' %}" class="btn btn-primary me-2">
+                                        <i class="fas fa-th"></i> Voir tous les produits
+                                    </a>
+                                    <a href="{% url 'boutique:recherche_avancee' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-sliders-h"></i> Recherche avancée
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                <!-- Page de recherche vide -->
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                    <h2>Que recherchez-vous ?</h2>
+                    <p class="lead text-muted mb-4">Trouvez rapidement vos produits préférés</p>
+                    
+                    <!-- Suggestions de recherche populaires -->
+                    <div class="mb-4">
+                        <h5>Recherches populaires :</h5>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <a href="{% url 'boutique:recherche' %}?q=canapé" class="btn btn-outline-secondary btn-sm">Canapé</a>
+                            <a href="{% url 'boutique:recherche' %}?q=table" class="btn btn-outline-secondary btn-sm">Table</a>
+                            <a href="{% url 'boutique:recherche' %}?q=lampe" class="btn btn-outline-secondary btn-sm">Lampe</a>
+                            <a href="{% url 'boutique:recherche' %}?q=cuisine" class="btn btn-outline-secondary btn-sm">Cuisine</a>
+                            <a href="{% url 'boutique:recherche' %}?q=rangement" class="btn btn-outline-secondary btn-sm">Rangement</a>
+                        </div>
+                    </div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-lightbulb text-warning"></i> Conseils de recherche
+                                    </h5>
+                                    <ul class="list-unstyled text-start">
+                                        <li><i class="fas fa-arrow-right text-primary"></i> Utilisez des mots simples</li>
+                                        <li><i class="fas fa-arrow-right text-primary"></i> Cherchez par catégorie (ex: "salon", "cuisine")</li>
+                                        <li><i class="fas fa-arrow-right text-primary"></i> Cherchez par marque ou référence</li>
+                                        <li><i class="fas fa-arrow-right text-primary"></i> Utilisez la recherche avancée pour plus de précision</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Focus automatique sur le champ de recherche si pas de query
+{% if not query %}
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput) {
+        searchInput.focus();
+    }
+});
+{% endif %}
+
+// Gestion de la recherche en temps réel (optionnel)
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.querySelector('form');
+    const searchInput = searchForm.querySelector('input[name="q"]');
+    
+    // Supprimer les espaces en début et fin lors de la soumission
+    searchForm.addEventListener('submit', function(e) {
+        const query = searchInput.value.trim();
+        if (query === '') {
+            e.preventDefault();
+            searchInput.focus();
+            return false;
+        }
+        searchInput.value = query;
+    });
+});
+</script>
+{% endblock %}

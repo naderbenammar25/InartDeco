@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InArtDeco - Équipements Maison{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS personnalisé -->
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --secondary-color: #000000;
+            --accent-color: #2c3e50;
+        }
+        
+        /* Styles pour navbar blanche */
+        .navbar-light .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+            width: 100px;
+            height: auto
+        }
+        
+        .navbar-light .navbar-nav .nav-link {
+            color: var(--secondary-color) !important;
+            font-weight: 500;
+        }
+        
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+        
+        .navbar-light .navbar-toggler {
+            border-color: var(--primary-color);
+        }
+        
+        .navbar-light .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2844, 62, 80, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        /* Bouton de recherche adapté pour fond blanc */
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Badge panier */
+        .navbar-light .badge {
+            background-color: var(--secondary-color) !important;
+        }
+        
+        /* Ombre pour délimiter la navbar */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Styles pour le slider hero */
+        .hero-slider {
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-slider .carousel-item {
+            height: 500px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        .hero-slider .carousel-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(28, 36, 44, 0.7), rgba(255, 255, 255, 0));
+            z-index: 1;
+        }
+        
+        .hero-slider .carousel-caption {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+            color: white;
+            width: 90%;
+        }
+        
+        .hero-slider .carousel-caption h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero-slider .carousel-caption p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .hero-slider .btn-hero {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .hero-slider .btn-hero:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Contrôles du carrousel */
+        .hero-slider .carousel-control-prev,
+        .hero-slider .carousel-control-next {
+            width: 5%;
+            opacity: 0.8;
+        }
+        
+        .hero-slider .carousel-control-prev:hover,
+        .hero-slider .carousel-control-next:hover {
+            opacity: 1;
+        }
+        
+        .hero-slider .carousel-indicators {
+            bottom: 20px;
+        }
+        
+        .hero-slider .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-slider {
+                height: 400px;
+            }
+            
+            .hero-slider .carousel-item {
+                height: 400px;
+            }
+            
+            .hero-slider .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-slider .carousel-caption p {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-slider {
+                height: 350px;
+            }
+            
+            .hero-slider .carousel-item {
+                height: 350px;
+            }
+            
+            .hero-slider .carousel-caption h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-slider .carousel-caption p {
+                font-size: 1rem;
+            }
+        }
+        
+        .product-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Styles pour le mega menu */
+        .mega-menu-container {
+            width: 100vw;
+            max-width: 1200px;
+            left: 50% !important;
+            transform: translateX(-50%);
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .mega-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .mega-menu-column {
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .mega-menu-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .mega-menu-section {
+            margin-bottom: 15px;
+        }
+
+        .mega-menu-section-title {
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .mega-menu-links {
+            list-style: none;
+            padding-left: 15px;
+            margin: 0;
+        }
+
+        .mega-menu-links li {
+            margin-bottom: 5px;
+        }
+
+        .mega-menu-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .mega-menu-links a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'boutique:accueil' %}">
+                <img src="{% static 'images/Asset.png' %}" alt="InArtDeco" class="img-fluid" style="max-height: 40px;">
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'boutique:accueil' %}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'boutique:liste_produits' %}">Produits</a>
+                    </li>
+                    <li class="nav-item dropdown mega-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-th-large"></i> Catalogue
+                        </a>
+                        <div class="dropdown-menu mega-menu-container" id="categories-mega-menu">
+                            <div class="loading-spinner text-center p-4">
+                                <i class="fas fa-spinner fa-spin"></i> Chargement...
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'boutique:recherche_avancee' %}">
+                            <i class="fas fa-search-plus"></i> Recherche avancée
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Barre de recherche rapide -->
+                <form class="d-flex me-3" method="GET" action="{% url 'boutique:recherche' %}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Rechercher..." aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <!-- Liens utilisateur -->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-shopping-cart"></i>
+                            Panier <span class="badge bg-secondary">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user"></i> Compte
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Slider Hero -->
+    <section class="hero-slider">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+            <!-- Indicateurs -->
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            </div>
+            
+            <!-- Slides -->
+            <div class="carousel-inner">
+                <!-- Slide 1 - Cuisine -->
+                <div class="carousel-item active" style="background-image: url('{% static 'images/cuisine.png' %}');">
+                    <div class="carousel-caption">
+                        <h1>Équipez votre cuisine</h1>
+                        <p>Découvrez notre collection d'ustensiles et électroménager de qualité professionnelle</p>
+                        <a href="{% url 'boutique:liste_produits' %}?categorie=1" class="btn-hero">
+                            <i class="fas fa-utensils"></i> Voir la collection cuisine
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Slide 2 - Salon -->
+                <div class="carousel-item" style="background-image: url('{% static 'images/salon.png' %}');">
+                    <div class="carousel-caption">
+                        <h1>Décorez votre salon</h1>
+                        <p>Mobilier, textiles et accessoires pour créer un espace de vie chaleureux</p>
+                        <a href="{% url 'boutique:liste_produits' %}?categorie=7" class="btn-hero">
+                            <i class="fas fa-couch"></i> Découvrir le salon
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Slide 3 - Promotions -->
+                <div class="carousel-item" style="background-image: url('{% static 'images/promo.png' %}');">
+                    <div class="carousel-caption">
+                        <h1>Offres exceptionnelles</h1>
+                        <p>Jusqu'à -50% sur une sélection de produits pour la maison</p>
+                        <a href="{% url 'boutique:liste_produits' %}?promotion=1" class="btn-hero">
+                            <i class="fas fa-tag"></i> Voir les promotions
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contrôles -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Précédent</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Suivant</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Contenu principal -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="{% static 'images/Asset.png' %}" alt="InArtDeco" style="max-height: 30px;" class="me-2">
+                        <h5 class="mb-0">InArtDeco</h5>
+                    </div>
+                    <p>Votre spécialiste en équipements maison de qualité.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Liens rapides</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'boutique:accueil' %}" class="text-light">Accueil</a></li>
+                        <li><a href="{% url 'boutique:liste_produits' %}" class="text-light">Produits</a></li>
+                        <li><a href="#" class="text-light">À propos</a></li>
+                        <li><a href="#" class="text-light">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <p><i class="fas fa-phone"></i> +33 1 23 45 67 89</p>
+                    <p><i class="fas fa-envelope"></i> contact@inartdeco.fr</p>
+                    <div class="mt-3">
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025 InArtDeco. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript pour charger les catégories -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const megaMenu = document.getElementById('categories-mega-menu');
+        let categoriesLoaded = false;
+        
+        // Charger les catégories au premier survol
+        megaMenu.closest('.mega-dropdown').addEventListener('mouseenter', function() {
+            if (!categoriesLoaded) {
+                fetch('{% url "boutique:categories_tree" %}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    megaMenu.innerHTML = data.html;
+                    categoriesLoaded = true;
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    megaMenu.innerHTML = '<div class="p-4 text-center text-danger">Erreur de chargement</div>';
+                });
+            }
+        });
+    });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

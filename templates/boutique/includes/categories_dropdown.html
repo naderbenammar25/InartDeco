@@ -1,0 +1,38 @@
+<!-- Chemin : templates/boutique/includes/categories_dropdown.html -->
+<div class="mega-menu">
+    {% for categorie in categories %}
+    <div class="mega-menu-column">
+        <div class="mega-menu-header">
+            <a href="{% url 'boutique:liste_produits' %}?categorie={{ categorie.id }}" class="text-decoration-none">
+                {% if categorie.icone %}
+                    <i class="{{ categorie.icone }}"></i>
+                {% endif %}
+                <strong>{{ categorie.nom }}</strong>
+            </a>
+        </div>
+        
+        {% if categorie.sous_categories.exists %}
+        <div class="mega-menu-content">
+            {% for sous_categorie in categorie.sous_categories.all %}
+            <div class="mega-menu-section">
+                <a href="{% url 'boutique:liste_produits' %}?categorie={{ sous_categorie.id }}" 
+                   class="mega-menu-section-title">{{ sous_categorie.nom }}</a>
+                
+                {% if sous_categorie.sous_categories.exists %}
+                <ul class="mega-menu-links">
+                    {% for sous_sous_categorie in sous_categorie.sous_categories.all %}
+                    <li>
+                        <a href="{% url 'boutique:liste_produits' %}?categorie={{ sous_sous_categorie.id }}">
+                            {{ sous_sous_categorie.nom }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>

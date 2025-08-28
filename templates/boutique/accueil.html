@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - InArtDeco{% endblock %}
+
+{% block content %}
+<!-- Section Hero -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Équipez votre maison avec style
+                </h1>
+                <p class="lead mb-4">
+                    Découvrez notre sélection d'équipements et décoration pour transformer votre intérieur en véritable cocon de bien-être.
+                </p>
+                <a href="{% url 'boutique:liste_produits' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-shopping-bag"></i> Découvrir nos produits
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://via.placeholder.com/500x400/34495e/ffffff?text=InArtDeco" 
+                     class="img-fluid rounded" alt="InArtDeco">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Produits vedettes -->
+{% if produits_vedettes %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">
+                <i class="fas fa-star text-warning"></i> Produits Vedettes
+            </h2>
+            <p class="lead text-muted">Nos coups de cœur sélectionnés pour vous</p>
+        </div>
+        
+        <div class="row">
+            {% for produit in produits_vedettes %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    {% if produit.image_principale %}
+                        <img src="{{ produit.image_principale.url }}" class="card-img-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ produit.nom }}</h5>
+                        <p class="card-text text-muted small">{{ produit.description|truncatewords:10 }}</p>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {% if produit.prix_promo %}
+                                    <span class="text-decoration-line-through text-muted">{{ produit.prix }}€</span>
+                                    <span class="h5 text-danger mb-0">{{ produit.prix_promo }}€</span>
+                                {% else %}
+                                    <span class="h5 text-primary mb-0">{{ produit.prix }}€</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'boutique:liste_produits' %}" class="btn btn-outline-primary btn-lg">
+                Voir tous les produits <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Nouveautés -->
+{% if produits_nouveaux %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">
+                <i class="fas fa-sparkles text-success"></i> Nouveautés
+            </h2>
+            <p class="lead text-muted">Les derniers arrivages dans notre collection</p>
+        </div>
+        
+        <div class="row">
+            {% for produit in produits_nouveaux %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card product-card h-100 position-relative">
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">Nouveau</span>
+                    
+                    {% if produit.image_principale %}
+                        <img src="{{ produit.image_principale.url }}" class="card-img-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ produit.nom }}</h5>
+                        <p class="card-text text-muted small">{{ produit.description|truncatewords:10 }}</p>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-primary mb-0">{{ produit.prix }}€</span>
+                            </div>
+                            <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Catégories -->
+{% if categories %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">
+                <i class="fas fa-th-large text-info"></i> Nos Catégories
+            </h2>
+            <p class="lead text-muted">Explorez nos différents univers</p>
+        </div>
+        
+        <div class="row">
+            {% for categorie in categories %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-couch fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{{ categorie.nom }}</h5>
+                        <p class="card-text">{{ categorie.description|default:"Découvrez notre sélection" }}</p>
+                        <a href="{% url 'boutique:liste_produits' %}?categorie={{ categorie.id }}" class="btn btn-outline-primary">
+                            Explorer <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

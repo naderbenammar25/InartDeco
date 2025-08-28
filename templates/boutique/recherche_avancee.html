@@ -1,0 +1,136 @@
+<!-- Chemin : templates/boutique/recherche_avancee.html -->
+{% extends 'base.html' %}
+
+{% block title %}Recherche avancée - InArtDeco{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1><i class="fas fa-search-plus"></i> Recherche avancée</h1>
+    
+    <div class="row">
+        <!-- Filtres -->
+        <div class="col-lg-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-filter"></i> Filtres</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET">
+                        <!-- Recherche textuelle -->
+                        <div class="mb-3">
+                            <label class="form-label">Recherche</label>
+                            <input type="text" name="q" class="form-control" 
+                                   value="{{ filtres_actifs.query }}" 
+                                   placeholder="Nom, description, référence...">
+                        </div>
+                        
+                        <!-- Catégorie -->
+                        <div class="mb-3">
+                            <label class="form-label">Catégorie</label>
+                            <select name="categorie" class="form-select" id="select-categorie">
+                                <option value="">Toutes les catégories</option>
+                                {% for categorie in categories %}
+                                <option value="{{ categorie.id }}" 
+                                        {% if filtres_actifs.categorie == categorie.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ categorie.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Marque -->
+                        <div class="mb-3">
+                            <label class="form-label">Marque</label>
+                            <select name="marque" class="form-select">
+                                <option value="">Toutes les marques</option>
+                                {% for marque in marques %}
+                                <option value="{{ marque.id }}"
+                                        {% if filtres_actifs.marque == marque.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ marque.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Prix -->
+                        <div class="mb-3">
+                            <label class="form-label">Prix</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" name="prix_min" class="form-control" 
+                                           placeholder="Min" value="{{ filtres_actifs.prix_min }}">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="prix_max" class="form-control" 
+                                           placeholder="Max" value="{{ filtres_actifs.prix_max }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="en_stock" value="1" class="form-check-input"
+                                       {% if filtres_actifs.en_stock %}checked{% endif %}>
+                                <label class="form-check-label">En stock uniquement</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" name="promotion" value="1" class="form-check-input"
+                                       {% if filtres_actifs.promotion %}checked{% endif %}>
+                                <label class="form-check-label">En promotion</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                        <a href="{% url 'boutique:recherche_avancee' %}" class="btn btn-outline-secondary w-100 mt-2">
+                            Effacer les filtres
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Résultats -->
+        <div class="col-lg-9">
+            {% if page_obj %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>{{ total_results }} produit{{ total_results|pluralize }} trouvé{{ total_results|pluralize }}</h5>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Trier par
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&tri=nom">Nom A-Z</a></li>
+                        <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&tri=prix_asc">Prix croissant</a></li>
+                        <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&tri=prix_desc">Prix décroissant</a></li>
+                        <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&tri=nouveau">Nouveautés</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="row">
+                {% for produit in page_obj %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    {% include 'boutique/includes/product_card.html' %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            {% include 'boutique/includes/pagination.html' %}
+            {% endif %}
+            
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h3>Aucun produit trouvé</h3>
+                <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
