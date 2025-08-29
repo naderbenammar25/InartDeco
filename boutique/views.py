@@ -218,3 +218,28 @@ def recherche_avancee(request):
     }
     
     return render(request, 'boutique/recherche_avancee.html', context)
+
+# Dans boutique/views.py, ajoutez cette vue
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+def categories_dropdown(request):
+    """Vue AJAX pour charger la liste simple des catégories"""
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Récupérer seulement les catégories principales (sans parent)
+        categories_principales = Categorie.objects.filter(parent=None, active=True).order_by('ordre', 'nom')
+        
+        html = ""
+        for categorie in categories_principales:
+            html += f'<li><a class="dropdown-item" href="/produits/?categorie={categorie.id}">'
+            html += f'<i class="{categorie.icone}"></i> {categorie.nom}</a></li>'
+            
+            # Ajouter les sous-catégories avec indentation
+            sous_categories = categorie.sous_categories.filter(active=True).order_by('ordre', 'nom')
+            for sous_cat in sous_categories:
+                html += f'<li><a class="dropdown-item ps-4" href="/produits/?categorie={sous_cat.id}">'
+                html += f'&nbsp;&nbsp;→ {sous_cat.nom}</a></li>'
+        
+        return JsonResponse({'html': html})
+    
+    return JsonResponse({'error': 'Requête invalide'}, status=400)

@@ -11,4 +11,6 @@ urlpatterns = [
     path('recherche/', views.recherche, name='recherche'),
     path('recherche-avancee/', views.recherche_avancee, name='recherche_avancee'),
     path('api/categories/', views.get_categories_tree, name='categories_tree'),
+    path('api/categories-dropdown/', views.categories_dropdown, name='categories_dropdown'),
+
 ]

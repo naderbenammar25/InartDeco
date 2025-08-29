@@ -281,6 +281,24 @@
         .mega-menu-links a:hover {
             color: var(--accent-color);
         }
+
+        
+.dropdown-menu {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -305,16 +323,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'boutique:liste_produits' %}">Produits</a>
                     </li>
-                    <li class="nav-item dropdown mega-dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-th-large"></i> Catalogue
-                        </a>
-                        <div class="dropdown-menu mega-menu-container" id="categories-mega-menu">
-                            <div class="loading-spinner text-center p-4">
-                                <i class="fas fa-spinner fa-spin"></i> Chargement...
-                            </div>
-                        </div>
-                    </li>
+                    <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-th-large"></i> Catalogue
+    </a>
+    <ul class="dropdown-menu" id="categories-dropdown">
+        <li><p class="dropdown-item">Toutes les catégories</p></li>
+        <li><hr class="dropdown-divider"></li>
+        <!-- Les catégories seront chargées ici -->
+        <li class="text-center p-2">
+            <i class="fas fa-spinner fa-spin"></i> Chargement...
+        </li>
+    </ul>
+</li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'boutique:recherche_avancee' %}">
                             <i class="fas fa-search-plus"></i> Recherche avancée
@@ -454,32 +475,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- JavaScript pour charger les catégories -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const megaMenu = document.getElementById('categories-mega-menu');
-        let categoriesLoaded = false;
-        
-        // Charger les catégories au premier survol
-        megaMenu.closest('.mega-dropdown').addEventListener('mouseenter', function() {
-            if (!categoriesLoaded) {
-                fetch('{% url "boutique:categories_tree" %}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    megaMenu.innerHTML = data.html;
-                    categoriesLoaded = true;
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    megaMenu.innerHTML = '<div class="p-4 text-center text-danger">Erreur de chargement</div>';
-                });
-            }
-        });
+    <!-- Remplacez le script existant dans base.html par : -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoriesDropdown = document.getElementById('categories-dropdown');
+    let categoriesLoaded = false;
+    
+    // Charger les catégories au premier clic/survol
+    categoriesDropdown.closest('.dropdown').addEventListener('mouseenter', function() {
+        if (!categoriesLoaded) {
+            fetch('{% url "boutique:categories_dropdown" %}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Garder le premier élément "Toutes les catégories"
+                const firstItems = `
+                    <li><a class="dropdown-item" href="{% url 'boutique:liste_produits' %}">
+                        <i class="fas fa-th"></i> Toutes les catégories
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                `;
+                categoriesDropdown.innerHTML = firstItems + data.html;
+                categoriesLoaded = true;
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                categoriesDropdown.innerHTML = `
+                    <li><a class="dropdown-item" href="{% url 'boutique:liste_produits' %}">
+                        <i class="fas fa-th"></i> Toutes les catégories
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="dropdown-item text-danger">Erreur de chargement</li>
+                `;
+            });
+        }
     });
-    </script>
+});
+</script>
     
     {% block extra_js %}{% endblock %}
 </body>
