@@ -154,6 +154,20 @@ class Produit(models.Model):
     def chemin_categorie(self):
         """Retourne le chemin complet de la catégorie du produit"""
         return self.categorie.chemin_complet
+    
+    @property
+    def economie(self):
+        """Calcule l'économie réalisée avec la promotion"""
+        if self.prix_promo and self.prix_promo < self.prix:
+            return float(self.prix) - float(self.prix_promo)
+        return 0
+    
+    @property
+    def pourcentage_reduction(self):
+        """Calcule le pourcentage de réduction"""
+        if self.prix_promo and self.prix_promo < self.prix:
+            return round(((float(self.prix) - float(self.prix_promo)) / float(self.prix)) * 100)
+        return 0
 
 
 class ImageProduit(models.Model):

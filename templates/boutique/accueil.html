@@ -57,10 +57,10 @@
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 {% if produit.prix_promo %}
-                                    <span class="text-decoration-line-through text-muted">{{ produit.prix }}€</span>
-                                    <span class="h5 text-danger mb-0">{{ produit.prix_promo }}€</span>
+                                    <span class="text-decoration-line-through text-muted">{{ produit.prix }} TND</span>
+                                    <span class="h5 text-danger mb-0">{{ produit.prix_promo }} TND</span>
                                 {% else %}
-                                    <span class="h5 text-primary mb-0">{{ produit.prix }}€</span>
+                                    <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
                                 {% endif %}
                             </div>
                             <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
@@ -113,7 +113,7 @@
                         
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="h5 text-primary mb-0">{{ produit.prix }}€</span>
+                                <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
                             </div>
                             <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
                                 <i class="fas fa-eye"></i> Voir détails
@@ -127,6 +127,8 @@
     </div>
 </section>
 {% endif %}
+
+
 
 <!-- Catégories -->
 {% if categories %}
@@ -144,18 +146,134 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card product-card h-100 text-center">
                     <div class="card-body">
-                        <i class="fas fa-couch fa-3x text-primary mb-3"></i>
+                        <!-- Icône dynamique selon la catégorie -->
+                        {% if "cuisine" in categorie.nom|lower or "ustensile" in categorie.nom|lower %}
+                            <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                        {% elif "electroménager" in categorie.nom|lower or "électroménager" in categorie.nom|lower %}
+                            <i class="fas fa-blender fa-3x text-primary mb-3"></i>
+                        {% elif "salon" in categorie.nom|lower or "séjour" in categorie.nom|lower %}
+                            <i class="fas fa-couch fa-3x text-primary mb-3"></i>
+                        {% elif "chambre" in categorie.nom|lower %}
+                            <i class="fas fa-bed fa-3x text-primary mb-3"></i>
+                        {% elif "salle de bain" in categorie.nom|lower or "bain" in categorie.nom|lower %}
+                            <i class="fas fa-bath fa-3x text-primary mb-3"></i>
+                        {% elif "jardin" in categorie.nom|lower or "extérieur" in categorie.nom|lower %}
+                            <i class="fas fa-seedling fa-3x text-primary mb-3"></i>
+                        {% elif "éclairage" in categorie.nom|lower or "luminaire" in categorie.nom|lower %}
+                            <i class="fas fa-lightbulb fa-3x text-primary mb-3"></i>
+                        {% elif "rangement" in categorie.nom|lower or "organisation" in categorie.nom|lower %}
+                            <i class="fas fa-archive fa-3x text-primary mb-3"></i>
+                        {% elif "décoration" in categorie.nom|lower or "deco" in categorie.nom|lower %}
+                            <i class="fas fa-palette fa-3x text-primary mb-3"></i>
+                        {% elif "textile" in categorie.nom|lower or "linge" in categorie.nom|lower %}
+                            <i class="fas fa-tshirt fa-3x text-primary mb-3"></i>
+                        {% elif "bureau" in categorie.nom|lower or "travail" in categorie.nom|lower %}
+                            <i class="fas fa-desktop fa-3x text-primary mb-3"></i>
+                        {% elif "enfant" in categorie.nom|lower or "bébé" in categorie.nom|lower %}
+                            <i class="fas fa-baby fa-3x text-primary mb-3"></i>
+                        {% elif "art" in categorie.nom|lower or "cadre" in categorie.nom|lower %}
+                            <i class="fas fa-picture-o fa-3x text-primary mb-3"></i>
+                        {% elif "sport" in categorie.nom|lower or "fitness" in categorie.nom|lower %}
+                            <i class="fas fa-dumbbell fa-3x text-primary mb-3"></i>
+                        {% elif "livre" in categorie.nom|lower or "bibliothèque" in categorie.nom|lower %}
+                            <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                        {% elif "table" in categorie.nom|lower %}
+                            <i class="fas fa-table fa-3x text-primary mb-3"></i>
+                        {% elif "chaise" in categorie.nom|lower or "siège" in categorie.nom|lower %}
+                            <i class="fas fa-chair fa-3x text-primary mb-3"></i>
+                        {% elif "miroir" in categorie.nom|lower %}
+                            <i class="fas fa-mirror fa-3x text-primary mb-3"></i>
+                        {% elif "horloge" in categorie.nom|lower or "temps" in categorie.nom|lower %}
+                            <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                        {% elif "plante" in categorie.nom|lower or "pot" in categorie.nom|lower %}
+                            <i class="fas fa-leaf fa-3x text-primary mb-3"></i>
+                        {% elif "vaisselle" in categorie.nom|lower or "assiette" in categorie.nom|lower %}
+                            <i class="fas fa-plate-wheat fa-3x text-primary mb-3"></i>
+                        {% elif "verre" in categorie.nom|lower or "boisson" in categorie.nom|lower %}
+                            <i class="fas fa-wine-glass fa-3x text-primary mb-3"></i>
+                        {% elif "couteau" in categorie.nom|lower or "couvert" in categorie.nom|lower %}
+                            <i class="fas fa-knife fa-3x text-primary mb-3"></i>
+                        {% elif "casserole" in categorie.nom|lower or "poêle" in categorie.nom|lower %}
+                            <i class="fas fa-fire-burner fa-3x text-primary mb-3"></i>
+                        {% elif "robot" in categorie.nom|lower or "mixer" in categorie.nom|lower %}
+                            <i class="fas fa-blender-phone fa-3x text-primary mb-3"></i>
+                        {% elif "café" in categorie.nom|lower or "thé" in categorie.nom|lower %}
+                            <i class="fas fa-coffee fa-3x text-primary mb-3"></i>
+                        {% elif "four" in categorie.nom|lower or "cuisson" in categorie.nom|lower %}
+                            <i class="fas fa-fire fa-3x text-primary mb-3"></i>
+                        {% elif "réfrigérateur" in categorie.nom|lower or "frigo" in categorie.nom|lower %}
+                            <i class="fas fa-snowflake fa-3x text-primary mb-3"></i>
+                        {% elif "lave" in categorie.nom|lower or "nettoyage" in categorie.nom|lower %}
+                            <i class="fas fa-soap fa-3x text-primary mb-3"></i>
+                        {% elif "aspirateur" in categorie.nom|lower or "ménage" in categorie.nom|lower %}
+                            <i class="fas fa-broom fa-3x text-primary mb-3"></i>
+                        {% elif "canapé" in categorie.nom|lower or "sofa" in categorie.nom|lower %}
+                            <i class="fas fa-couch fa-3x text-primary mb-3"></i>
+                        {% elif "armoire" in categorie.nom|lower or "placard" in categorie.nom|lower %}
+                            <i class="fas fa-door-closed fa-3x text-primary mb-3"></i>
+                        {% elif "matelas" in categorie.nom|lower or "sommier" in categorie.nom|lower %}
+                            <i class="fas fa-bed fa-3x text-primary mb-3"></i>
+                        {% elif "rideau" in categorie.nom|lower or "store" in categorie.nom|lower %}
+                            <i class="fas fa-window-maximize fa-3x text-primary mb-3"></i>
+                        {% elif "tapis" in categorie.nom|lower or "moquette" in categorie.nom|lower %}
+                            <i class="fas fa-rug fa-3x text-primary mb-3"></i>
+                        {% elif "coussin" in categorie.nom|lower or "oreiller" in categorie.nom|lower %}
+                            <i class="fas fa-square fa-3x text-primary mb-3"></i>
+                        {% elif "lampe" in categorie.nom|lower or "suspension" in categorie.nom|lower %}
+                            <i class="fas fa-lightbulb fa-3x text-primary mb-3"></i>
+                        {% elif "ventilateur" in categorie.nom|lower or "climatisation" in categorie.nom|lower %}
+                            <i class="fas fa-fan fa-3x text-primary mb-3"></i>
+                        {% elif "chauffage" in categorie.nom|lower or "radiateur" in categorie.nom|lower %}
+                            <i class="fas fa-temperature-high fa-3x text-primary mb-3"></i>
+                        {% elif "sécurité" in categorie.nom|lower or "alarme" in categorie.nom|lower %}
+                            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                        {% elif "audio" in categorie.nom|lower or "musique" in categorie.nom|lower %}
+                            <i class="fas fa-music fa-3x text-primary mb-3"></i>
+                        {% elif "télé" in categorie.nom|lower or "tv" in categorie.nom|lower %}
+                            <i class="fas fa-tv fa-3x text-primary mb-3"></i>
+                        {% elif "gaming" in categorie.nom|lower or "jeu" in categorie.nom|lower %}
+                            <i class="fas fa-gamepad fa-3x text-primary mb-3"></i>
+                        {% elif "outillage" in categorie.nom|lower or "bricolage" in categorie.nom|lower %}
+                            <i class="fas fa-tools fa-3x text-primary mb-3"></i>
+                        {% elif "peinture" in categorie.nom|lower or "décor" in categorie.nom|lower %}
+                            <i class="fas fa-paint-roller fa-3x text-primary mb-3"></i>
+                        {% elif "barbecue" in categorie.nom|lower or "grill" in categorie.nom|lower %}
+                            <i class="fas fa-fire fa-3x text-primary mb-3"></i>
+                        {% elif "piscine" in categorie.nom|lower or "spa" in categorie.nom|lower %}
+                            <i class="fas fa-swimming-pool fa-3x text-primary mb-3"></i>
+                        {% else %}
+                            <!-- Icône par défaut si aucune correspondance -->
+                            <i class="fas fa-home fa-3x text-primary mb-3"></i>
+                        {% endif %}
+                        
                         <h5 class="card-title">{{ categorie.nom }}</h5>
                         <p class="card-text">{{ categorie.description|default:"Découvrez notre sélection" }}</p>
-                        <a href="{% url 'boutique:liste_produits' %}?categorie={{ categorie.id }}" class="btn btn-outline-primary">
-                            Explorer <i class="fas fa-arrow-right"></i>
-                        </a>
+                        
+                        <!-- Afficher le nombre de produits si disponible -->
+                        {% if categorie.produits_count %}
+                            <small class="text-muted">{{ categorie.produits_count }} produit{{ categorie.produits_count|pluralize }}</small>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <a href="{% url 'boutique:liste_produits' %}?categorie={{ categorie.id }}" class="btn btn-outline-primary">
+                                Explorer <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Bouton pour voir toutes les catégories -->
+        <div class="text-center mt-4">
+            <a href="{% url 'boutique:liste_produits' %}" class="btn btn-outline-info btn-lg">
+                <i class="fas fa-th"></i> Voir toutes les catégories
+            </a>
+        </div>
     </div>
 </section>
 {% endif %}
+
+
 {% endblock %}
