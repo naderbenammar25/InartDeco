@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Panier - InArtDeco{% endblock %}
+{% block extra_content %}
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'boutique:accueil' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Mon Panier</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2"><i class="fas fa-shopping-cart"></i> Mon Panier</h1>
+                {% if panier_detaille %}
+                    <button class="btn btn-outline-danger" onclick="viderPanier()">
+                        <i class="fas fa-trash"></i> Vider le panier
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if panier_detaille %}
+        <div class="row">
+            <!-- Articles du panier -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Articles ({{ nb_articles }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for item in panier_detaille %}
+                        <div class="row align-items-center border-bottom py-3" id="item-{{ item.produit.id }}">
+                            <!-- Image -->
+                            <div class="col-md-2">
+                                {% if item.image %}
+                                    <img src="{{ item.image }}" alt="{{ item.produit.nom }}" 
+                                         class="img-fluid rounded" style="max-height: 80px;">
+                                {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                         style="height: 80px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Informations produit -->
+                            <div class="col-md-4">
+                                <h6 class="mb-1">{{ item.produit.nom }}</h6>
+                                <small class="text-muted">Ref: {{ item.produit.reference }}</small><br>
+                                {% if item.produit.stock_faible %}
+                                    <small class="text-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Stock faible ({{ item.produit.stock }} restant)
+                                    </small>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Prix unitaire -->
+                            <div class="col-md-2 text-center">
+                                <span class="fw-bold">{{ item.prix_unitaire }} TND</span>
+                            </div>
+                            
+                            <!-- Quantité -->
+                            <div class="col-md-2">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" type="button" 
+                                            onclick="modifierQuantite({{ item.produit.id }}, {{ item.quantite|add:'-1' }})">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" class="form-control text-center" 
+                                           value="{{ item.quantite }}" min="1" max="{{ item.produit.stock }}"
+                                           id="qty-{{ item.produit.id }}"
+                                           onchange="modifierQuantite({{ item.produit.id }}, this.value)">
+                                    <button class="btn btn-outline-secondary" type="button" 
+                                            onclick="modifierQuantite({{ item.produit.id }}, {{ item.quantite|add:'1' }})">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Total ligne -->
+                            <div class="col-md-1 text-center">
+                                <span class="fw-bold" id="total-{{ item.produit.id }}">{{ item.total }} TND</span>
+                            </div>
+                            
+                            <!-- Supprimer -->
+                            <div class="col-md-1 text-center">
+                                <button class="btn btn-outline-danger btn-sm" 
+                                        onclick="supprimerDuPanier({{ item.produit.id }})"
+                                        title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Résumé commande -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Résumé de la commande</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sous-total ({{ nb_articles }} articles)</span>
+                            <span id="sous-total">{{ sous_total }} TND</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Frais de livraison</span>
+                            <span class="{% if frais_livraison == 0 %}text-success{% endif %}">
+                                {% if frais_livraison == 0 %}
+                                    Gratuit
+                                {% else %}
+                                    {{ frais_livraison }} TND
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        {% if frais_livraison > 0 %}
+                        <small class="text-muted mb-3 d-block">
+                            <i class="fas fa-info-circle"></i> 
+                            Livraison gratuite dès 100 TND d'achat
+                        </small>
+                        {% endif %}
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total</strong>
+                            <strong id="total-commande">{{ total }} TND</strong>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card"></i> Passer la commande
+                            </button>
+                            <a href="{% url 'boutique:liste_produits' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Continuer les achats
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Code promo -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Code promotionnel</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Code promo" id="code-promo">
+                            <button class="btn btn-outline-primary" type="button">
+                                Appliquer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Panier vide -->
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h3>Votre panier est vide</h3>
+            <p class="text-muted">Découvrez nos produits et commencez vos achats !</p>
+            <a href="{% url 'boutique:liste_produits' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-bag"></i> Découvrir nos produits
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    
+// Fonctions JavaScript pour gérer le panier
+function modifierQuantite(produitId, nouvelleQuantite) {
+    if (nouvelleQuantite < 1) return;
+    
+    fetch(`/panier/modifier/${produitId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({'quantite': nouvelleQuantite})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Rechargement simple pour l'instant
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la modification');
+    });
+}
+
+function supprimerDuPanier(produitId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+        fetch(`/panier/supprimer/${produitId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function viderPanier() {
+    if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+        fetch('/panier/vider/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

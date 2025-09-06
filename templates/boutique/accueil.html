@@ -9,7 +9,10 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
+
+                <h1 class="display-4 fw-bold mb-4" style="margin-top: 20px; margin-bottom: 20px;">
+                                    <img src="{% static 'images/Asset.png' %}" alt="InArtDeco" style="max-height: 100px; margin-top: 20px; margin-bottom: 20px;" class="me-2">
+
                     Équipez votre maison avec style
                 </h1>
                 <p class="lead mb-4">
@@ -18,10 +21,6 @@
                 <a href="{% url 'boutique:liste_produits' %}" class="btn btn-light btn-lg">
                     <i class="fas fa-shopping-bag"></i> Découvrir nos produits
                 </a>
-            </div>
-            <div class="col-lg-6">
-                <img src="https://via.placeholder.com/500x400/34495e/ffffff?text=InArtDeco" 
-                     class="img-fluid rounded" alt="InArtDeco">
             </div>
         </div>
     </div>
@@ -41,7 +40,7 @@
         <div class="row">
             {% for produit in produits_vedettes %}
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100">
+                <div class="card product-card h-100 clickable-card" data-href="{% url 'boutique:detail_produit' produit.pk %}">
                     {% if produit.image_principale %}
                         <img src="{{ produit.image_principale.url }}" class="card-img-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
                     {% else %}
@@ -55,17 +54,33 @@
                         <p class="card-text text-muted small">{{ produit.description|truncatewords:10 }}</p>
                         
                         <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <!-- Prix -->
+                            <div class="mb-3">
                                 {% if produit.prix_promo %}
-                                    <span class="text-decoration-line-through text-muted">{{ produit.prix }} TND</span>
-                                    <span class="h5 text-danger mb-0">{{ produit.prix_promo }} TND</span>
+                                    <div>
+                                        <span class="text-decoration-line-through text-muted small">{{ produit.prix }} TND</span><br>
+                                        <span class="h5 text-danger mb-0">{{ produit.prix_promo }} TND</span>
+                                    </div>
                                 {% else %}
                                     <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
                                 {% endif %}
                             </div>
-                            <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
-                                <i class="fas fa-eye"></i> Voir détails
-                            </a>
+                            
+                            <!-- Boutons d'action -->
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-outline-dark-custom btn-sm">
+                                    <i class="fas fa-eye"></i> Voir détails
+                                </a>
+                                {% if produit.disponible %}
+                                    <button class="btn btn-success btn-sm btn-prevent-card-click" onclick="ajouterAuPanier({{ produit.id }}, '{{ produit.nom|escapejs }}')">
+                                        <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-times"></i> Rupture de stock
+                                    </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -96,7 +111,7 @@
         <div class="row">
             {% for produit in produits_nouveaux %}
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100 position-relative">
+                <div class="card product-card h-100 position-relative clickable-card" data-href="{% url 'boutique:detail_produit' produit.pk %}">
                     <span class="badge bg-success position-absolute top-0 end-0 m-2">Nouveau</span>
                     
                     {% if produit.image_principale %}
@@ -112,12 +127,33 @@
                         <p class="card-text text-muted small">{{ produit.description|truncatewords:10 }}</p>
                         
                         <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
+                            <!-- Prix -->
+                            <div class="mb-3">
+                                {% if produit.prix_promo %}
+                                    <div>
+                                        <span class="text-decoration-line-through text-muted small">{{ produit.prix }} TND</span><br>
+                                        <span class="h5 text-danger mb-0">{{ produit.prix_promo }} TND</span>
+                                    </div>
+                                {% else %}
+                                    <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
+                                {% endif %}
                             </div>
-                            <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-primary w-100">
-                                <i class="fas fa-eye"></i> Voir détails
-                            </a>
+                            
+                            <!-- Boutons d'action -->
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'boutique:detail_produit' produit.pk %}" class="btn btn-outline-dark-custom btn-sm">
+                                    <i class="fas fa-eye"></i> Voir détails
+                                </a>
+                                {% if produit.disponible %}
+                                    <button class="btn btn-success btn-sm btn-prevent-card-click" onclick="ajouterAuPanier({{ produit.id }}, '{{ produit.nom|escapejs }}')">
+                                        <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-times"></i> Rupture de stock
+                                    </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -127,8 +163,6 @@
     </div>
 </section>
 {% endif %}
-
-
 
 <!-- Catégories -->
 {% if categories %}
@@ -165,82 +199,6 @@
                             <i class="fas fa-archive fa-3x text-primary mb-3"></i>
                         {% elif "décoration" in categorie.nom|lower or "deco" in categorie.nom|lower %}
                             <i class="fas fa-palette fa-3x text-primary mb-3"></i>
-                        {% elif "textile" in categorie.nom|lower or "linge" in categorie.nom|lower %}
-                            <i class="fas fa-tshirt fa-3x text-primary mb-3"></i>
-                        {% elif "bureau" in categorie.nom|lower or "travail" in categorie.nom|lower %}
-                            <i class="fas fa-desktop fa-3x text-primary mb-3"></i>
-                        {% elif "enfant" in categorie.nom|lower or "bébé" in categorie.nom|lower %}
-                            <i class="fas fa-baby fa-3x text-primary mb-3"></i>
-                        {% elif "art" in categorie.nom|lower or "cadre" in categorie.nom|lower %}
-                            <i class="fas fa-picture-o fa-3x text-primary mb-3"></i>
-                        {% elif "sport" in categorie.nom|lower or "fitness" in categorie.nom|lower %}
-                            <i class="fas fa-dumbbell fa-3x text-primary mb-3"></i>
-                        {% elif "livre" in categorie.nom|lower or "bibliothèque" in categorie.nom|lower %}
-                            <i class="fas fa-book fa-3x text-primary mb-3"></i>
-                        {% elif "table" in categorie.nom|lower %}
-                            <i class="fas fa-table fa-3x text-primary mb-3"></i>
-                        {% elif "chaise" in categorie.nom|lower or "siège" in categorie.nom|lower %}
-                            <i class="fas fa-chair fa-3x text-primary mb-3"></i>
-                        {% elif "miroir" in categorie.nom|lower %}
-                            <i class="fas fa-mirror fa-3x text-primary mb-3"></i>
-                        {% elif "horloge" in categorie.nom|lower or "temps" in categorie.nom|lower %}
-                            <i class="fas fa-clock fa-3x text-primary mb-3"></i>
-                        {% elif "plante" in categorie.nom|lower or "pot" in categorie.nom|lower %}
-                            <i class="fas fa-leaf fa-3x text-primary mb-3"></i>
-                        {% elif "vaisselle" in categorie.nom|lower or "assiette" in categorie.nom|lower %}
-                            <i class="fas fa-plate-wheat fa-3x text-primary mb-3"></i>
-                        {% elif "verre" in categorie.nom|lower or "boisson" in categorie.nom|lower %}
-                            <i class="fas fa-wine-glass fa-3x text-primary mb-3"></i>
-                        {% elif "couteau" in categorie.nom|lower or "couvert" in categorie.nom|lower %}
-                            <i class="fas fa-knife fa-3x text-primary mb-3"></i>
-                        {% elif "casserole" in categorie.nom|lower or "poêle" in categorie.nom|lower %}
-                            <i class="fas fa-fire-burner fa-3x text-primary mb-3"></i>
-                        {% elif "robot" in categorie.nom|lower or "mixer" in categorie.nom|lower %}
-                            <i class="fas fa-blender-phone fa-3x text-primary mb-3"></i>
-                        {% elif "café" in categorie.nom|lower or "thé" in categorie.nom|lower %}
-                            <i class="fas fa-coffee fa-3x text-primary mb-3"></i>
-                        {% elif "four" in categorie.nom|lower or "cuisson" in categorie.nom|lower %}
-                            <i class="fas fa-fire fa-3x text-primary mb-3"></i>
-                        {% elif "réfrigérateur" in categorie.nom|lower or "frigo" in categorie.nom|lower %}
-                            <i class="fas fa-snowflake fa-3x text-primary mb-3"></i>
-                        {% elif "lave" in categorie.nom|lower or "nettoyage" in categorie.nom|lower %}
-                            <i class="fas fa-soap fa-3x text-primary mb-3"></i>
-                        {% elif "aspirateur" in categorie.nom|lower or "ménage" in categorie.nom|lower %}
-                            <i class="fas fa-broom fa-3x text-primary mb-3"></i>
-                        {% elif "canapé" in categorie.nom|lower or "sofa" in categorie.nom|lower %}
-                            <i class="fas fa-couch fa-3x text-primary mb-3"></i>
-                        {% elif "armoire" in categorie.nom|lower or "placard" in categorie.nom|lower %}
-                            <i class="fas fa-door-closed fa-3x text-primary mb-3"></i>
-                        {% elif "matelas" in categorie.nom|lower or "sommier" in categorie.nom|lower %}
-                            <i class="fas fa-bed fa-3x text-primary mb-3"></i>
-                        {% elif "rideau" in categorie.nom|lower or "store" in categorie.nom|lower %}
-                            <i class="fas fa-window-maximize fa-3x text-primary mb-3"></i>
-                        {% elif "tapis" in categorie.nom|lower or "moquette" in categorie.nom|lower %}
-                            <i class="fas fa-rug fa-3x text-primary mb-3"></i>
-                        {% elif "coussin" in categorie.nom|lower or "oreiller" in categorie.nom|lower %}
-                            <i class="fas fa-square fa-3x text-primary mb-3"></i>
-                        {% elif "lampe" in categorie.nom|lower or "suspension" in categorie.nom|lower %}
-                            <i class="fas fa-lightbulb fa-3x text-primary mb-3"></i>
-                        {% elif "ventilateur" in categorie.nom|lower or "climatisation" in categorie.nom|lower %}
-                            <i class="fas fa-fan fa-3x text-primary mb-3"></i>
-                        {% elif "chauffage" in categorie.nom|lower or "radiateur" in categorie.nom|lower %}
-                            <i class="fas fa-temperature-high fa-3x text-primary mb-3"></i>
-                        {% elif "sécurité" in categorie.nom|lower or "alarme" in categorie.nom|lower %}
-                            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
-                        {% elif "audio" in categorie.nom|lower or "musique" in categorie.nom|lower %}
-                            <i class="fas fa-music fa-3x text-primary mb-3"></i>
-                        {% elif "télé" in categorie.nom|lower or "tv" in categorie.nom|lower %}
-                            <i class="fas fa-tv fa-3x text-primary mb-3"></i>
-                        {% elif "gaming" in categorie.nom|lower or "jeu" in categorie.nom|lower %}
-                            <i class="fas fa-gamepad fa-3x text-primary mb-3"></i>
-                        {% elif "outillage" in categorie.nom|lower or "bricolage" in categorie.nom|lower %}
-                            <i class="fas fa-tools fa-3x text-primary mb-3"></i>
-                        {% elif "peinture" in categorie.nom|lower or "décor" in categorie.nom|lower %}
-                            <i class="fas fa-paint-roller fa-3x text-primary mb-3"></i>
-                        {% elif "barbecue" in categorie.nom|lower or "grill" in categorie.nom|lower %}
-                            <i class="fas fa-fire fa-3x text-primary mb-3"></i>
-                        {% elif "piscine" in categorie.nom|lower or "spa" in categorie.nom|lower %}
-                            <i class="fas fa-swimming-pool fa-3x text-primary mb-3"></i>
                         {% else %}
                             <!-- Icône par défaut si aucune correspondance -->
                             <i class="fas fa-home fa-3x text-primary mb-3"></i>
@@ -248,11 +206,6 @@
                         
                         <h5 class="card-title">{{ categorie.nom }}</h5>
                         <p class="card-text">{{ categorie.description|default:"Découvrez notre sélection" }}</p>
-                        
-                        <!-- Afficher le nombre de produits si disponible -->
-                        {% if categorie.produits_count %}
-                            <small class="text-muted">{{ categorie.produits_count }} produit{{ categorie.produits_count|pluralize }}</small>
-                        {% endif %}
                         
                         <div class="mt-3">
                             <a href="{% url 'boutique:liste_produits' %}?categorie={{ categorie.id }}" class="btn btn-outline-primary">
@@ -275,5 +228,116 @@
 </section>
 {% endif %}
 
+<!-- JavaScript pour le panier -->
+<script>
+// Gestion des cartes cliquables
+document.addEventListener('DOMContentLoaded', function() {
+    // Rendre les cartes cliquables
+    const clickableCards = document.querySelectorAll('.clickable-card');
+    clickableCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Vérifier si le clic provient d'un bouton ou d'un lien
+            if (!e.target.closest('.btn-prevent-card-click') && !e.target.closest('a') && !e.target.closest('button')) {
+                const href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            }
+        });
+    });
+    
+    // Charger le compteur au démarrage de la page
+    fetch('/panier/count/')
+        .then(response => response.json())
+        .then(data => {
+            updateCartCounter(data.count);
+        })
+        .catch(error => console.log('Erreur compteur panier:', error));
+});
+
+// Fonction pour ajouter au panier
+function ajouterAuPanier(produitId, nomProduit) {
+    // Empêcher la propagation du clic vers la carte
+    event.stopPropagation();
+    
+    fetch(`/panier/ajouter/${produitId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`${nomProduit} ajouté au panier !`, 'success');
+            updateCartCounter(data.nb_articles);
+        } else {
+            showNotification(data.message || 'Erreur lors de l\'ajout au panier', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showNotification('Erreur lors de l\'ajout au panier', 'error');
+    });
+}
+
+// Fonction pour récupérer le token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fonction pour afficher une notification
+function showNotification(message, type) {
+    // Supprimer les notifications existantes
+    const existingNotifications = document.querySelectorAll('.toast-notification');
+    existingNotifications.forEach(notif => notif.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} toast-notification position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    // Supprimer automatiquement après 3 secondes
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Fonction pour mettre à jour le compteur du panier
+function updateCartCounter(count) {
+    const counter = document.querySelector('#cart-counter');
+    if (counter) {
+        counter.textContent = count;
+        counter.style.display = count > 0 ? 'inline' : 'none';
+        
+        // Animation du compteur
+        counter.classList.add('animate__animated', 'animate__pulse');
+        setTimeout(() => {
+            counter.classList.remove('animate__animated', 'animate__pulse');
+        }, 600);
+    }
+}
+</script>
 
 {% endblock %}

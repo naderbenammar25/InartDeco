@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ produit.nom }} - InArtDeco{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'boutique:accueil' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'boutique:liste_produits' %}">Produits</a></li>
+            {% if produit.categorie %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'boutique:liste_produits' %}?categorie={{ produit.categorie.id }}">
+                        {{ produit.categorie.nom }}
+                    </a>
+                </li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ produit.nom }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Images du produit -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body p-0">
+                    <!-- Image principale -->
+                    <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <!-- Image principale -->
+                            <div class="carousel-item active">
+                                {% if produit.image_principale %}
+                                    <img src="{{ produit.image_principale.url }}" 
+                                         class="d-block w-100" alt="{{ produit.nom }}"
+                                         style="height: 500px; object-fit: cover;">
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-center bg-light" 
+                                         style="height: 500px;">
+                                        <i class="fas fa-image fa-5x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Images supplémentaires -->
+                            {% for image in images_supplementaires %}
+                            <div class="carousel-item">
+                                <img src="{{ image.image.url }}" 
+                                     class="d-block w-100" alt="{{ image.alt_text }}"
+                                     style="height: 500px; object-fit: cover;">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Contrôles du carousel -->
+                        {% if images_supplementaires %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Miniatures -->
+                    {% if images_supplementaires %}
+                    <div class="row g-2 p-3">
+                        <div class="col-3">
+                            <img src="{{ produit.image_principale.url }}" 
+                                 class="img-fluid rounded border cursor-pointer thumbnail-img active" 
+                                 data-bs-target="#productCarousel" data-bs-slide-to="0">
+                        </div>
+                        {% for image in images_supplementaires %}
+                        <div class="col-3">
+                            <img src="{{ image.image.url }}" 
+                                 class="img-fluid rounded border cursor-pointer thumbnail-img" 
+                                 data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations du produit -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <!-- En-tête produit -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="h3 mb-2">{{ produit.nom }}</h1>
+                            {% if produit.marque %}
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-tag"></i> {{ produit.marque.nom }}
+                                </p>
+                            {% endif %}
+                            {% if produit.reference %}
+                                <small class="text-muted">Réf: {{ produit.reference }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Badges -->
+                        <div>
+                            {% if produit.nouveau %}
+                                <span class="badge bg-success mb-1">Nouveau</span><br>
+                            {% endif %}
+                            {% if produit.featured %}
+                                <span class="badge bg-warning">⭐ Vedette</span><br>
+                            {% endif %}
+                            {% if produit.en_promotion %}
+                                <span class="badge bg-danger">Promo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Prix -->
+                    <div class="mb-4">
+                        {% if produit.prix_promo %}
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="h4 text-danger mb-0">{{ produit.prix_promo }} TND</span>
+                                <span class="text-decoration-line-through text-muted">{{ produit.prix }} TND</span>
+                                <span class="badge bg-danger">
+                                    -{{ produit.economie|floatformat:0 }} TND
+                                </span>
+                            </div>
+                        {% else %}
+                            <span class="h4 text-primary mb-0">{{ produit.prix }} TND</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ produit.description|linebreaks }}</p>
+                    </div>
+
+                    <!-- Caractéristiques -->
+                    <div class="mb-4">
+                        <h5>Caractéristiques</h5>
+                        <div class="row">
+                            {% if produit.dimensions %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Dimensions:</strong><br>
+                                <span class="text-muted">{{ produit.dimensions }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if produit.poids %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Poids:</strong><br>
+                                <span class="text-muted">{{ produit.poids }} kg</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if produit.couleur %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Couleur:</strong><br>
+                                <span class="text-muted">{{ produit.couleur }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if produit.materiau %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Matériau:</strong><br>
+                                <span class="text-muted">{{ produit.materiau }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="col-md-6 mb-2">
+                                <strong>État:</strong><br>
+                                <span class="text-muted text-capitalize">{{ produit.get_etat_display }}</span>
+                            </div>
+                            
+                            {% if produit.code_barre %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Code barre:</strong><br>
+                                <span class="text-muted">{{ produit.code_barre }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Stock et disponibilité -->
+                    <div class="mb-4">
+                        {% if produit.disponible %}
+                            {% if produit.stock_faible %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Stock faible !</strong> Plus que {{ produit.stock }} article{{ produit.stock|pluralize }} disponible{{ produit.stock|pluralize }}.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>En stock</strong> ({{ produit.stock }} disponible{{ produit.stock|pluralize }})
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-times-circle"></i>
+                                <strong>Rupture de stock</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions d'achat -->
+                    <div class="mb-4">
+                        {% if produit.disponible %}
+                            <div class="row g-2">
+                                <!-- Sélecteur de quantité -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Quantité</label>
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="form-control text-center" id="quantity" 
+                                               value="1" min="1" max="{{ produit.stock }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Boutons d'action -->
+                                <div class="col-md-8">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success btn-lg" onclick="ajouterAuPanierAvecQuantite()">
+                                            <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                        </button>
+                                        <button class="btn btn-outline-primary">
+                                            <i class="fas fa-heart"></i> Ajouter aux favoris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                <i class="fas fa-times"></i> Produit indisponible
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Informations livraison -->
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i class="fas fa-truck"></i> Livraison</h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><i class="fas fa-check text-success"></i> Livraison gratuite dès 100 TND</li>
+                                <li><i class="fas fa-clock text-info"></i> Livraison sous 2-3 jours ouvrés</li>
+                                <li><i class="fas fa-shield-alt text-primary"></i> Garantie constructeur incluse</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produits similaires -->
+    {% if produits_similaires %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">
+                <i class="fas fa-thumbs-up text-primary"></i> Produits similaires
+            </h3>
+            <div class="row">
+                {% for produit_similaire in produits_similaires %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card product-card h-100">
+                        {% if produit_similaire.image_principale %}
+                            <img src="{{ produit_similaire.image_principale.url }}" 
+                                 class="card-img-top" alt="{{ produit_similaire.nom }}" 
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ produit_similaire.nom }}</h6>
+                            <p class="card-text text-muted small">{{ produit_similaire.description|truncatewords:8 }}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="mb-2">
+                                    {% if produit_similaire.prix_promo %}
+                                        <span class="text-decoration-line-through text-muted small">{{ produit_similaire.prix }} TND</span><br>
+                                        <span class="h6 text-danger mb-0">{{ produit_similaire.prix_promo }} TND</span>
+                                    {% else %}
+                                        <span class="h6 text-primary mb-0">{{ produit_similaire.prix }} TND</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'boutique:detail_produit' produit_similaire.pk %}" 
+                                   class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- CSS pour les miniatures -->
+<style>
+.thumbnail-img {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.thumbnail-img:hover,
+.thumbnail-img.active {
+    opacity: 1;
+    border-color: var(--bs-primary) !important;
+    border-width: 2px !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+// Gestion de la quantité
+function changeQuantity(delta) {
+    const quantityInput = document.getElementById('quantity');
+    const currentValue = parseInt(quantityInput.value);
+    const newValue = currentValue + delta;
+    const maxValue = parseInt(quantityInput.max);
+    
+    if (newValue >= 1 && newValue <= maxValue) {
+        quantityInput.value = newValue;
+    }
+}
+
+// Ajouter au panier avec quantité
+function ajouterAuPanierAvecQuantite() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const produitId = {{ produit.id }};
+    const nomProduit = "{{ produit.nom|escapejs }}";
+    
+    // Appeler la fonction d'ajout plusieurs fois selon la quantité
+    for (let i = 0; i < quantity; i++) {
+        ajouterAuPanier(produitId, nomProduit);
+    }
+}
+
+// Fonction pour ajouter au panier (reprise de accueil.html)
+function ajouterAuPanier(produitId, nomProduit) {
+    fetch(`/panier/ajouter/${produitId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`${nomProduit} ajouté au panier !`, 'success');
+            updateCartCounter(data.nb_articles);
+        } else {
+            showNotification(data.message || 'Erreur lors de l\'ajout au panier', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showNotification('Erreur lors de l\'ajout au panier', 'error');
+    });
+}
+
+// Fonctions utilitaires (reprises de accueil.html)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    const existingNotifications = document.querySelectorAll('.toast-notification');
+    existingNotifications.forEach(notif => notif.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} toast-notification position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+function updateCartCounter(count) {
+    const counter = document.querySelector('#cart-counter');
+    if (counter) {
+        counter.textContent = count;
+        counter.style.display = count > 0 ? 'inline' : 'none';
+        
+        counter.classList.add('animate__animated', 'animate__pulse');
+        setTimeout(() => {
+            counter.classList.remove('animate__animated', 'animate__pulse');
+        }, 600);
+    }
+}
+
+// Gestion des miniatures
+document.addEventListener('DOMContentLoaded', function() {
+    const thumbnails = document.querySelectorAll('.thumbnail-img');
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+            thumbnails.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}

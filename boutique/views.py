@@ -1,16 +1,36 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import Produit, Categorie, Marque
+from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+from .models import Produit, Categorie, Marque, ImageProduit
 
 
 def accueil(request):
-    """Page d'accueil avec produits vedettes"""
-    produits_vedettes = Produit.objects.filter(featured=True, active=True)[:8]
-    produits_nouveaux = Produit.objects.filter(nouveau=True, active=True)[:8]
-    categories = Categorie.objects.filter(active=True, parent__isnull=True)[:6]
+    # Récupérer les produits vedettes
+    produits_vedettes = Produit.objects.filter(
+        featured=True, 
+        active=True
+    ).select_related('categorie', 'marque')[:4]
+    
+    # Récupérer les nouveautés
+    produits_nouveaux = Produit.objects.filter(
+        nouveau=True, 
+        active=True
+    ).select_related('categorie', 'marque')[:4]
+    
+    # Récupérer les catégories principales avec le nombre de produits
+    # CORRECTION : changer 'produit' par 'produits' (ligne 32 et 33)
+    categories = Categorie.objects.filter(
+        parent__isnull=True,  # Catégories principales seulement
+        active=True
+    ).annotate(
+        produits_count=Count('produits', filter=Q(produits__active=True))
+    ).order_by('nom')[:6]  # Limiter à 6 catégories pour l'affichage
     
     context = {
         'produits_vedettes': produits_vedettes,
@@ -18,6 +38,8 @@ def accueil(request):
         'categories': categories,
     }
     return render(request, 'boutique/accueil.html', context)
+
+
 
 def liste_produits(request):
     """Liste des produits avec filtres"""
@@ -243,3 +265,211 @@ def categories_dropdown(request):
         return JsonResponse({'html': html})
     
     return JsonResponse({'error': 'Requête invalide'}, status=400)
+
+# ...existing code...
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+def ajouter_au_panier(request, produit_id):
+    """Ajouter un produit au panier (session)"""
+    if request.method == 'POST':
+        produit = get_object_or_404(Produit, id=produit_id)
+        
+        # Vérifier le stock et la disponibilité
+        if not produit.disponible:
+            return JsonResponse({
+                'success': False,
+                'message': 'Produit non disponible'
+            })
+        
+        # Récupérer le panier de la session
+        panier = request.session.get('panier', {})
+        
+        # Ajouter ou incrémenter la quantité
+        if str(produit_id) in panier:
+            # Vérifier si on peut ajouter encore (stock disponible)
+            nouvelle_quantite = panier[str(produit_id)]['quantite'] + 1
+            if nouvelle_quantite > produit.stock:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Stock insuffisant. Seulement {produit.stock} disponible(s)'
+                })
+            panier[str(produit_id)]['quantite'] = nouvelle_quantite
+        else:
+            panier[str(produit_id)] = {
+                'nom': produit.nom,
+                'prix': float(produit.prix_final),
+                'quantite': 1,
+                'image': produit.image_principale.url if produit.image_principale else '',
+                'reference': produit.reference or '',
+                'max_stock': produit.stock
+            }
+        
+        # Sauvegarder le panier en session
+        request.session['panier'] = panier
+        request.session.modified = True
+        
+        # Calculer le nombre total d'articles
+        nb_articles = sum(item['quantite'] for item in panier.values())
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{produit.nom} ajouté au panier',
+            'nb_articles': nb_articles
+        })
+    
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée'})
+
+def voir_panier(request):
+    """Afficher le contenu du panier"""
+    panier = request.session.get('panier', {})
+    
+    # Enrichir les données du panier avec les infos produits
+    panier_detaille = []
+    sous_total = 0
+    
+    for produit_id, item in panier.items():
+        try:
+            produit = Produit.objects.get(id=produit_id)
+            item_total = item['prix'] * item['quantite']
+            sous_total += item_total
+            
+            panier_detaille.append({
+                'produit': produit,
+                'quantite': item['quantite'],
+                'prix_unitaire': item['prix'],
+                'total': item_total,
+                'image': item.get('image', ''),
+            })
+        except Produit.DoesNotExist:
+            # Supprimer les produits qui n'existent plus
+            del request.session['panier'][produit_id]
+            request.session.modified = True
+    
+    # Calculer les totaux
+    nb_articles = sum(item['quantite'] for item in panier.values())
+    frais_livraison = 15.00 if sous_total < 100 else 0  # Livraison gratuite au-dessus de 100 TND
+    total = sous_total + frais_livraison
+    
+    context = {
+        'panier_detaille': panier_detaille,
+        'sous_total': sous_total,
+        'frais_livraison': frais_livraison,
+        'total': total,
+        'nb_articles': nb_articles,
+    }
+    
+    return render(request, 'boutique/panier.html', context)
+
+def modifier_quantite_panier(request, produit_id):
+    """Modifier la quantité d'un produit dans le panier"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        nouvelle_quantite = int(data.get('quantite', 1))
+        
+        produit = get_object_or_404(Produit, id=produit_id)
+        panier = request.session.get('panier', {})
+        
+        if str(produit_id) in panier:
+            if nouvelle_quantite <= 0:
+                # Supprimer l'article
+                del panier[str(produit_id)]
+                message = f'{produit.nom} retiré du panier'
+            elif nouvelle_quantite > produit.stock:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Stock insuffisant. Seulement {produit.stock} disponible(s)'
+                })
+            else:
+                # Mettre à jour la quantité
+                panier[str(produit_id)]['quantite'] = nouvelle_quantite
+                message = f'Quantité mise à jour pour {produit.nom}'
+            
+            request.session['panier'] = panier
+            request.session.modified = True
+            
+            # Recalculer les totaux
+            nb_articles = sum(item['quantite'] for item in panier.values())
+            sous_total = sum(item['prix'] * item['quantite'] for item in panier.values())
+            
+            return JsonResponse({
+                'success': True,
+                'message': message,
+                'nb_articles': nb_articles,
+                'sous_total': sous_total
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Erreur'})
+
+def supprimer_du_panier(request, produit_id):
+    """Supprimer un produit du panier"""
+    if request.method == 'POST':
+        panier = request.session.get('panier', {})
+        
+        if str(produit_id) in panier:
+            produit_nom = panier[str(produit_id)]['nom']
+            del panier[str(produit_id)]
+            request.session['panier'] = panier
+            request.session.modified = True
+            
+            nb_articles = sum(item['quantite'] for item in panier.values())
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'{produit_nom} retiré du panier',
+                'nb_articles': nb_articles
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Erreur'})
+
+def count_panier(request):
+    """Retourner le nombre d'articles dans le panier"""
+    panier = request.session.get('panier', {})
+    count = sum(item['quantite'] for item in panier.values())
+    return JsonResponse({'count': count})
+
+def vider_panier(request):
+    """Vider complètement le panier"""
+    if request.method == 'POST':
+        request.session['panier'] = {}
+        request.session.modified = True
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Panier vidé',
+            'nb_articles': 0
+        })
+    
+    return JsonResponse({'success': False, 'message': 'Erreur'})
+
+
+def detail_produit(request, pk):
+    """Afficher les détails d'un produit"""
+    produit = get_object_or_404(Produit, pk=pk, active=True)
+    
+    # Récupérer les images supplémentaires
+    images_supplementaires = ImageProduit.objects.filter(produit=produit).order_by('ordre')
+    
+    # Produits similaires (même catégorie, excluant le produit actuel)
+    produits_similaires = Produit.objects.filter(
+        categorie=produit.categorie,
+        active=True
+    ).exclude(pk=pk)[:4]
+    
+    # Vérifier si le produit est dans le panier
+    panier = request.session.get('panier', {})
+    quantite_panier = panier.get(str(pk), {}).get('quantite', 0)
+    
+    context = {
+        'produit': produit,
+        'images_supplementaires': images_supplementaires,
+        'produits_similaires': produits_similaires,
+        'quantite_panier': quantite_panier,
+    }
+    
+    return render(request, 'boutique/detail_produit.html', context)
+
