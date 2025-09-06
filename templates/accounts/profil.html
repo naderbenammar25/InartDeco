@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - InArtDeco{% endblock %}
+
+{% block extra_content %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'boutique:accueil' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Mon Profil</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2"><i class="fas fa-user-circle"></i> Mon Profil</h1>
+                <a href="{% url 'accounts:modifier_profil' %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Modifier le profil
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations personnelles -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-user"></i> Informations personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Prénom :</strong> {{ user.first_name|default:"Non renseigné" }}</p>
+                            <p><strong>Nom :</strong> {{ user.last_name|default:"Non renseigné" }}</p>
+                            <p><strong>Email :</strong> {{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Nom d'utilisateur :</strong> {{ user.username }}</p>
+                            <p><strong>Téléphone :</strong> {{ profil.telephone|default:"Non renseigné" }}</p>
+                            <p><strong>Newsletter :</strong> {% if profil.newsletter %}Activée{% else %}Désactivée{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mes adresses -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-map-marker-alt"></i> Mes adresses</h5>
+                    <a href="{% url 'accounts:ajouter_adresse' %}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus"></i> Ajouter une adresse
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if adresses %}
+                        <div class="row">
+                            {% for adresse in adresses %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-secondary">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title">
+                                                    {{ adresse.nom }}
+                                                    {% if adresse.par_defaut %}
+                                                        <span class="badge bg-primary">Par défaut</span>
+                                                    {% endif %}
+                                                </h6>
+                                                <p class="card-text small">
+                                                    {{ adresse.prenom }} {{ adresse.nom_famille }}<br>
+                                                    {{ adresse.adresse_ligne1 }}<br>
+                                                    {% if adresse.adresse_ligne2 %}{{ adresse.adresse_ligne2 }}<br>{% endif %}
+                                                    {{ adresse.code_postal }} {{ adresse.ville }}<br>
+                                                    {{ adresse.pays }}<br>
+                                                    <i class="fas fa-phone"></i> {{ adresse.telephone }}
+                                                </p>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="{% url 'accounts:modifier_adresse' adresse.pk %}">
+                                                        <i class="fas fa-edit"></i> Modifier
+                                                    </a></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'accounts:supprimer_adresse' adresse.pk %}">
+                                                        <i class="fas fa-trash"></i> Supprimer
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">
+                            <i class="fas fa-map-marker-alt fa-3x mb-3"></i><br>
+                            Aucune adresse enregistrée.<br>
+                            <a href="{% url 'accounts:ajouter_adresse' %}" class="btn btn-primary mt-2">
+                                Ajouter ma première adresse
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-cog"></i> Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:modifier_profil' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier le profil
+                        </a>
+                        <a href="#" class="btn btn-outline-info">
+                            <i class="fas fa-list"></i> Mes commandes
+                        </a>
+                        <a href="{% url 'accounts:ajouter_adresse' %}" class="btn btn-outline-success">
+                            <i class="fas fa-plus"></i> Nouvelle adresse
+                        </a>
+                        <a href="{% url 'accounts:password_reset' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-key"></i> Changer mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Mon activité</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Membre depuis :</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                    <p><strong>Dernière connexion :</strong> {{ user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</p>
+                    <p><strong>Adresses enregistrées :</strong> {{ adresses.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
